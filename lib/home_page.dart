@@ -9,12 +9,22 @@ class MainPage extends StatefulWidget {
   State<MainPage> createState() => _MainPageState();
 }
 
+class TodoItem {
+  String text;
+  int seconds;
+  bool timerRunning;
+
+  TodoItem(this.text)
+      : seconds = 0,
+        timerRunning = false;
+}
+
 class _MainPageState extends State<MainPage> {
-  List<String> todoItems = [];
+  List<TodoItem> todoItems = [];
 
   void addTodoItem(String item) {
     setState(() {
-      todoItems.add(item);
+      todoItems.add(TodoItem(item));
     });
   }
 
@@ -65,7 +75,7 @@ class _MainPageState extends State<MainPage> {
 }
 
 class SpacedItemsList extends StatelessWidget {
-  final List<String> items;
+  final List<TodoItem> items;
 
   final Function(int) onItemFinished;
 
@@ -86,7 +96,8 @@ class SpacedItemsList extends StatelessWidget {
             children: List.generate(
                 items.length,
                 (index) => ItemWidget(
-                      text: items[index],
+                      //text: items[index],
+                      item: items[index],
                       onFinished: () {
                         onItemFinished(
                             index); // Call the callback to finish the item
@@ -119,25 +130,29 @@ class SpacedItemsList extends StatelessWidget {
 // }
 
 class ItemWidget extends StatefulWidget {
+  final TodoItem item;
+  final VoidCallback onFinished;
+
   const ItemWidget({
     Key? key,
-    required this.text,
+    required this.item,
     required this.onFinished,
   }) : super(key: key);
-
-  final String text;
-  final VoidCallback onFinished;
 
   @override
   _ItemWidgetState createState() => _ItemWidgetState();
 }
 
 class _ItemWidgetState extends State<ItemWidget> {
-  Timer? _timer; // Use Timer? instead of Timer
+  //Timer? _timer; // Use Timer? instead of Timer
+  late Timer _timer;
   bool _showButtons = false;
-  bool _timerRunning = false;
+
+//  bool _timerRunning = false;
   //late Timer _timer;
+
   int _seconds = 0;
+  int _pausedSeconds = 0;
 
   @override
   void initState() {
@@ -146,9 +161,9 @@ class _ItemWidgetState extends State<ItemWidget> {
   }
 
   void _updateTimer(Timer timer) {
-    if (_timerRunning) {
+    if (widget.item.timerRunning) {
       setState(() {
-        _seconds++;
+        widget.item.seconds++;
       });
     }
   }
@@ -163,18 +178,19 @@ class _ItemWidgetState extends State<ItemWidget> {
   // }
   void _toggleTimer() {
     setState(() {
-      _timerRunning = !_timerRunning;
-      if (_timerRunning) {
+      widget.item.timerRunning = !widget.item.timerRunning;
+      if (widget.item.timerRunning) {
         _resetTimer(); // Reset the timer when starting
       } else {
-        _timer?.cancel(); // Cancel the timer when stopping
+        widget.item.seconds = _pausedSeconds;
+        _timer.cancel();
       }
     });
   }
 
   void _resetTimer() {
-    _timer?.cancel(); // Cancel the previous timer if it exists
-    _seconds = 0;
+    _timer.cancel(); // Cancel the previous timer if it exists
+    _pausedSeconds = widget.item.seconds;
     _timer = Timer.periodic(const Duration(seconds: 1), _updateTimer);
   }
 
@@ -185,7 +201,7 @@ class _ItemWidgetState extends State<ItemWidget> {
 
   @override
   void dispose() {
-    _timer?.cancel();
+    _timer.cancel();
     super.dispose();
   }
 
@@ -208,7 +224,7 @@ class _ItemWidgetState extends State<ItemWidget> {
           children: [
             SizedBox(
               height: 100,
-              child: Center(child: Text(widget.text)),
+              child: Center(child: Text(widget.item.text)),
             ),
             if (_showButtons)
               Positioned(
@@ -216,14 +232,14 @@ class _ItemWidgetState extends State<ItemWidget> {
                 right: 0,
                 child: Row(
                   children: [
-                    if (!_timerRunning)
+                    if (!widget.item.timerRunning)
                       IconButton(
                         onPressed: () {
                           _toggleTimer();
                         },
                         icon: Icon(Icons.play_arrow),
                       ),
-                    if (_timerRunning)
+                    if (widget.item.timerRunning)
                       IconButton(
                         onPressed: () {
                           _toggleTimer();
@@ -251,14 +267,14 @@ class _ItemWidgetState extends State<ItemWidget> {
               top: 0,
               left: 0,
               child: Text(
-                _timerRunning
-                    ? _formatTime(_seconds)
-                    : _seconds > 0
-                        ? 'Elapsed: ${_formatTime(_seconds)}'
+                widget.item.timerRunning
+                    ? _formatTime(widget.item.seconds)
+                    : widget.item.seconds > 0
+                        ? 'Elapsed: ${_formatTime(widget.item.seconds)}'
                         : 'Not Started',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: _timerRunning ? Colors.black : Colors.red,
+                  color: widget.item.timerRunning ? Colors.black : Colors.red,
                 ),
               ),
             ),
