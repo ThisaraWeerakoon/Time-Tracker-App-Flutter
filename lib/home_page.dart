@@ -350,3 +350,17 @@ class _CreateButtonState extends State<CreateButton> {
     );
   }
 }
+
+class NewOne extends StatefulWidget {
+  const NewOne({super.key});
+
+  @override
+  State<NewOne> createState() => _NewOneState();
+}
+
+class _NewOneState extends State<NewOne> {
+  @override
+  Widget build(BuildContext context) {
+    return const Placeholder();
+  }
+}
