@@ -138,6 +138,7 @@ class _ItemWidgetState extends State<ItemWidget> {
   bool _timerRunning = false;
   //late Timer _timer;
   int _seconds = 0;
+  int _pausedSeconds = 0;
 
   @override
   void initState() {
@@ -167,6 +168,7 @@ class _ItemWidgetState extends State<ItemWidget> {
       if (_timerRunning) {
         _resetTimer(); // Reset the timer when starting
       } else {
+        _pausedSeconds = _seconds;
         _timer?.cancel(); // Cancel the timer when stopping
       }
     });
@@ -174,7 +176,7 @@ class _ItemWidgetState extends State<ItemWidget> {
 
   void _resetTimer() {
     _timer?.cancel(); // Cancel the previous timer if it exists
-    _seconds = 0;
+    _seconds = _pausedSeconds;
     _timer = Timer.periodic(const Duration(seconds: 1), _updateTimer);
   }
 
@@ -348,19 +350,5 @@ class _CreateButtonState extends State<CreateButton> {
         ],
       ),
     );
-  }
-}
-
-class NewOne extends StatefulWidget {
-  const NewOne({super.key});
-
-  @override
-  State<NewOne> createState() => _NewOneState();
-}
-
-class _NewOneState extends State<NewOne> {
-  @override
-  Widget build(BuildContext context) {
-    return const Placeholder();
   }
 }
