@@ -110,25 +110,6 @@ class SpacedItemsList extends StatelessWidget {
   }
 }
 
-// class ItemWidget extends StatelessWidget {
-//   const ItemWidget({
-//     super.key,
-//     required this.text,
-//   });
-
-//   final String text;
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Card(
-//       child: SizedBox(
-//         height: 100,
-//         child: Center(child: Text(text)),
-//       ),
-//     );
-//   }
-// }
-
 class ItemWidget extends StatefulWidget {
   final TodoItem item;
   final VoidCallback onFinished;
@@ -144,13 +125,8 @@ class ItemWidget extends StatefulWidget {
 }
 
 class _ItemWidgetState extends State<ItemWidget> {
-  //Timer? _timer; // Use Timer? instead of Timer
   late Timer _timer;
   bool _showButtons = false;
-
-//  bool _timerRunning = false;
-  //late Timer _timer;
-
   int _seconds = 0;
   int _pausedSeconds = 0;
 
@@ -168,21 +144,14 @@ class _ItemWidgetState extends State<ItemWidget> {
     }
   }
 
-  // void _toggleTimer() {
-  //   setState(() {
-  //     _timerRunning = !_timerRunning;
-  //     if (_timerRunning) {
-  //       _seconds = 0; // Reset the seconds when timer starts
-  //     }
-  //   });
-  // }
   void _toggleTimer() {
     setState(() {
       widget.item.timerRunning = !widget.item.timerRunning;
       if (widget.item.timerRunning) {
-        _resetTimer(); // Reset the timer when starting
+        // Don't reset the timer, just start or resume it
+        _timer = Timer.periodic(const Duration(seconds: 1), _updateTimer);
       } else {
-        widget.item.seconds = _pausedSeconds;
+        _pausedSeconds = widget.item.seconds;
         _timer.cancel();
       }
     });
@@ -217,7 +186,6 @@ class _ItemWidgetState extends State<ItemWidget> {
         setState(() {
           _showButtons = false; // Hide the buttons when tapped
         });
-        // Handle tapping the card, you can add your logic here
       },
       child: Card(
         child: Stack(
@@ -252,7 +220,6 @@ class _ItemWidgetState extends State<ItemWidget> {
                         widget
                             .onFinished(); // Call the callback to finish the item
                       },
-                      //icon: Icon(Icons.delete),
                       icon: const Text(
                         "Finished",
                         style: TextStyle(
@@ -340,13 +307,13 @@ class _CreateButtonState extends State<CreateButton> {
           Container(
             decoration: const BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.blue, // Change this to the desired color
+              color: Colors.blue,
             ),
-            padding: const EdgeInsets.all(8), // Adjust the padding as needed
+            padding: const EdgeInsets.all(8),
             child: const Icon(
               Icons.add,
               color: Colors.white,
-              size: 24, // Adjust the size of the icon
+              size: 24,
             ),
           ),
           Positioned(
@@ -355,7 +322,7 @@ class _CreateButtonState extends State<CreateButton> {
             child: Container(
               decoration: const BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.red, // Change this to the desired mark color
+                color: Colors.red,
               ),
               width: 12,
               height: 12,
